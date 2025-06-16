@@ -1,5 +1,4 @@
 <script setup lang="ts">
-// The component accepts the list ID as a prop.
 const props = defineProps({
   paperId: {
     type: String,
@@ -7,17 +6,13 @@ const props = defineProps({
   },
 });
 
-// --- STATE MANAGEMENT FOR "LOAD MORE" ---
-// Controls how many articles are currently rendered. Starts at 3.
 const visibleArticleCount = ref(3);
 
-// --- UPDATED INTERFACE ---
-// Added 'snippet' for the short preview text.
 interface Article {
   title: string;
   link: string;
-  snippet: string; // For the preview of the first 3 articles
-  htmlContent: string; // For the full HTML content
+  snippet: string;
+  htmlContent: string;
   author: string;
   pubDate: string;
   imageUrl: string | null;
@@ -29,11 +24,8 @@ interface ListData {
   articles: Article[];
 }
 
-// --- HELPER FUNCTION TO CREATE A SNIPPET ---
-// Safely creates a plain-text summary from HTML.
 const createSnippet = (html: string, maxLength = 200): string => {
   if (!html) return "";
-  // This requires a browser environment, which is fine since server: false.
   const div = document.createElement("div");
   div.innerHTML = html;
   const text = div.textContent || div.innerText || "";
@@ -41,15 +33,12 @@ const createSnippet = (html: string, maxLength = 200): string => {
   return text.slice(0, maxLength) + "...";
 };
 
-// --- DATA FETCHING ---
 const { data, pending, error } = await useFetch(
   `/api/rss/newspaper/${props.paperId}`,
   {
     key: `list-articles-${props.paperId}`,
     server: false,
     cache: "no-cache",
-
-    // The transform function now also creates the snippet.
     transform: async (rawData: unknown): Promise<ListData> => {
       if (!(rawData instanceof Blob)) {
         return { listTitle: "Fehler", articles: [] };
@@ -77,7 +66,7 @@ const { data, pending, error } = await useFetch(
           title: getText("title"),
           link: getText("link"),
           htmlContent: htmlContent,
-          snippet: createSnippet(htmlContent), // Create the snippet here
+          snippet: createSnippet(htmlContent),
           author: getText("author") || getText("dc\\:creator"),
           pubDate: getText("pubDate"),
           imageUrl: imageUrl,
@@ -89,27 +78,21 @@ const { data, pending, error } = await useFetch(
   },
 );
 
-// --- COMPUTED PROPERTIES FOR DISPLAY ---
-// This computed property returns only the articles that should be visible.
 const displayedArticles = computed(() => {
   if (!data.value) return [];
   return data.value.articles.slice(0, visibleArticleCount.value);
 });
 
-// This computed property determines if the "Load More" button should be shown.
 const showLoadMoreButton = computed(() => {
   return data.value && data.value.articles.length > visibleArticleCount.value;
 });
 
-// --- METHODS ---
-// This function updates the count to show all articles.
 const loadMore = () => {
   if (data.value) {
     visibleArticleCount.value = data.value.articles.length;
   }
 };
 
-// Helper function for date formatting.
 const formatDate = (dateString: string) => {
   if (!dateString) return "";
   return new Date(dateString).toLocaleDateString("de-DE", {
@@ -121,7 +104,6 @@ const formatDate = (dateString: string) => {
 </script>
 
 <template>
-  <!-- Loading, Error, and Empty states remain unchanged -->
   <div v-if="pending" class="space-y-4">
     <USkeleton v-for="i in 3" :key="i" class="h-48 w-full" />
   </div>
@@ -143,15 +125,12 @@ const formatDate = (dateString: string) => {
       />
     </div>
 
-    <!-- --- UPDATED ARTICLES LIST --- -->
     <div v-else class="space-y-4">
-      <!-- The v-for now iterates over the 'displayedArticles' computed property -->
       <UCard
         v-for="(article, index) in displayedArticles"
         :key="index"
       >
         <div class="flex flex-col sm:flex-row">
-          <!-- Image Section (always shown if available) -->
           <div v-if="article.imageUrl" class="sm:w-1/3">
             <img
               :src="article.imageUrl"
@@ -170,22 +149,18 @@ const formatDate = (dateString: string) => {
               {{ article.title }}
             </NuxtLink>
 
-            <!-- *** CONDITIONAL CONTENT DISPLAY *** -->
-            <!-- Show snippet for the first 3 articles -->
             <p
               v-if="index < 3"
               class="text-gray-600 dark:text-gray-300 flex-1"
             >
               {{ article.snippet }}
             </p>
-            <!-- Show full content for articles loaded via "Load More" -->
             <div
               v-else
               v-html="article.htmlContent"
               class="prose prose-sm dark:prose-invert text-gray-600 dark:text-gray-300 max-w-none flex-1"
             ></div>
 
-            <!-- Footer (Categories, Author, Date) -->
             <div class="mt-4">
               <div
                 v-if="article.categories.length > 0"

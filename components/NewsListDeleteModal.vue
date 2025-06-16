@@ -19,7 +19,6 @@ const { data: newsList, pending } = await useAsyncData(
 );
 
 const state = createFormState();
-// Delete modal state
 const isDeleteModalOpen = ref(false);
 const deleteConfirmation = ref("");
 const deleteLoading = ref(false);
@@ -28,15 +27,13 @@ const canDelete = computed(() => {
   return deleteConfirmation.value === newsList.value?.name;
 });
 
-// Sanitize selectableNewspapers for the USelectMenu component
 const formattedSelectableNewspapers = computed(() => {
   return (selectableNewspapers.value ?? []).map((item) => ({
     ...item,
-    label: item.label ?? "", // Ensure label is never null
+    label: item.label ?? "", 
   }));
 });
 
-// Proxy computed for USelectMenu v-model to handle object/ID mismatch
 const selectedNewspapers = computed({
   get() {
     const allItems = formattedSelectableNewspapers.value;
@@ -51,7 +48,7 @@ const selectedNewspapers = computed({
   },
 });
 
-// Populate form when data is loaded
+// Populate form when data is loade
 watch(
   newsList,
   (newList) => {

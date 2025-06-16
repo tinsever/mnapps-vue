@@ -15,11 +15,9 @@ const { data: country, pending } = await useAsyncData(
   () => getCountry(routeId)
 );
 
-// Delete modal state
 const deleteConfirmation = ref("");
 const deleteLoading = ref(false);
 
-// Computed to check if delete confirmation matches
 const canDelete = computed(() => {
   return deleteConfirmation.value === country.value?.name;
 });

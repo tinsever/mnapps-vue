@@ -1,14 +1,13 @@
 <script setup lang="ts">
 import type { FormSubmitEvent } from "#ui/types";
 
-// 1. Use the new news list composable
 const {
   newsListCreateSchema,
   createNewsList,
   createFormState,
   navigateToNewsListEdit,
-  selectableNewspapers, // Data for the multi-select
-  pendingNewspapers, // Loading state for the multi-select
+  selectableNewspapers, 
+  pendingNewspapers, 
 } = useNewsList();
 
 const schema = newsListCreateSchema;
@@ -18,15 +17,13 @@ const state = createFormState();
 const formRef = ref();
 const loading = ref(false);
 
-// Sanitize selectableNewspapers for the USelectMenu component
 const formattedSelectableNewspapers = computed(() => {
   return (selectableNewspapers.value ?? []).map((item) => ({
     ...item,
-    label: item.label ?? "", // Ensure label is never null
+    label: item.label ?? "", 
   }));
 });
 
-// Proxy computed for USelectMenu v-model to handle object/ID mismatch
 const selectedNewspapers = computed({
   get() {
     const allItems = formattedSelectableNewspapers.value;
@@ -67,7 +64,6 @@ function handleSave() {
   >
     <slot></slot>
     <template #body>
-      <!-- This container constrains the width of your form -->
       <div class="w-full max-w-3xl">
       <UForm
         ref="formRef"
@@ -77,7 +73,6 @@ function handleSave() {
         @submit="onSubmit"
       >
         <div class="grid grid-cols-1 gap-6">
-          <!-- List Name -->
           <UFormField name="name" label="Listenname">
             <UInput
               v-model="state.name"
@@ -88,7 +83,6 @@ function handleSave() {
             />
           </UFormField>
 
-          <!-- Newspaper Multi-Select -->
           <UFormField name="newspapers" label="Zeitungen auswählen">
             <USelectMenu
               v-model="selectedNewspapers"
@@ -106,7 +100,6 @@ function handleSave() {
         </div>
       </UForm>
 
-        <!-- Wrapper for button alignment and spacing -->
         <div class="mt-8 flex justify-end">
           <UButton
             @click="handleSave"

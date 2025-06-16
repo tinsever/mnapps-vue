@@ -28,7 +28,6 @@ const formattedDate = computed(() => {
         <span>{{ formattedDate }}</span>
       </div>
 
-      <!-- Using h2 for better semantics in a list -->
       <h2 class="text-2xl font-bold text-gray-900 dark:text-white">
         {{ article.title }}
       </h2>

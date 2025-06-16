@@ -41,7 +41,6 @@ function handleSave() {
   >
     <slot></slot>
     <template #body>
-      <!-- This container constrains the width of your form -->
       <div class="w-full max-w-3xl">
         <UForm
           ref="formRef"
@@ -86,7 +85,6 @@ function handleSave() {
           </div>
         </UForm>
 
-        <!-- Wrapper for button alignment and spacing -->
         <div class="mt-8 flex justify-end">
           <UButton
             @click="handleSave"

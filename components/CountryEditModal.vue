@@ -58,7 +58,6 @@ function handleSave() {
   >
     <slot></slot>
     <template #body>
-      <!-- This container constrains the width of your form -->
       <div class="w-full max-w-3xl">
         <UForm
           ref="formRef"

@@ -2,34 +2,22 @@ import { z } from "zod";
 import type { Database } from "~/types/supabase";
 import { useNewspaper } from "~/composables/useNewspaper";
 
-// Types from DB Schema
 export type NewsList = Database["public"]["Tables"]["newspaper_list"]["Row"];
-export type NewsListInsert =
-  Database["public"]["Tables"]["newspaper_list"]["Insert"];
-export type NewsListUpdate =
-  Database["public"]["Tables"]["newspaper_list"]["Update"];
+export type NewsListInsert = Database["public"]["Tables"]["newspaper_list"]["Insert"];
+export type NewsListUpdate = Database["public"]["Tables"]["newspaper_list"]["Update"];
 
-// Custom type for forms and lists, using the correct columns
 export type NewsListEdit = Pick<
   NewsList,
   "id" | "name" | "newspapers" | "filter_authors" | "filter_categories"
 >;
 export type NewsListPlus = Pick<
   NewsList,
-  | "id"
-  | "name"
-  | "newspapers"
-  | "author"
-  | "filter_authors"
-  | "filter_categories"
+  "id" | "name" | "newspapers" | "author" | "filter_authors" | "filter_categories"
 >;
 
-// Zod Schemas for Validation, using the correct columns
 export const newsListBaseSchema = z.object({
   name: z.string().min(3, "Listenname muss mindestens 3 Zeichen lang sein."),
-  newspapers: z
-    .array(z.number())
-    .min(1, "Die Liste muss mindestens eine Zeitung enthalten."),
+  newspapers: z.array(z.number()).min(1, "Die Liste muss mindestens eine Zeitung enthalten."),
   filter_authors: z.array(z.string()).optional(),
   filter_categories: z.array(z.string()).optional(),
 });
@@ -47,14 +35,10 @@ export const useNewsList = () => {
   const router = useRouter();
   const { getNewspapers } = useNewspaper();
 
-  // --- DATA FETCHING (Corrected to use the right columns) ---
-
   const getNewsList = async (id: string): Promise<NewsListPlus> => {
     const { data, error } = await supabase
       .from("newspaper_list")
-      .select(
-        "id, name, newspapers, author, filter_authors, filter_categories",
-      )
+      .select("id, name, newspapers, author, filter_authors, filter_categories")
       .eq("id", id)
       .single();
 
@@ -71,9 +55,7 @@ export const useNewsList = () => {
     if (!user.value?.id) return [];
     const { data, error } = await supabase
       .from("newspaper_list")
-      .select(
-        "id, name, newspapers, author, filter_authors, filter_categories",
-      )
+      .select("id, name, newspapers, author, filter_authors, filter_categories")
       .eq("author", user.value.id)
       .order("created_at", { ascending: false });
     if (error) return [];
@@ -83,15 +65,11 @@ export const useNewsList = () => {
   const getNewsLists = async (): Promise<NewsListPlus[]> => {
     const { data, error } = await supabase
       .from("newspaper_list")
-      .select(
-        "id, name, newspapers, author, filter_authors, filter_categories",
-      )
+      .select("id, name, newspapers, author, filter_authors, filter_categories")
       .order("created_at", { ascending: false });
     if (error) return [];
     return data;
   };
-
-  // --- Fetching data for filter selection (This part was always correct) ---
 
   const { data: selectableAuthors, pending: pendingAuthors } = useAsyncData(
     "all-distinct-authors",
@@ -99,29 +77,31 @@ export const useNewsList = () => {
       const { data, error } = await supabase.rpc("get_distinct_authors");
       if (error) return [];
       return data.map((a) => a.author_name);
-    },
+    }
   );
 
-  const { data: selectableCategories, pending: pendingCategories } =
-    useAsyncData("all-distinct-categories", async () => {
+  const { data: selectableCategories, pending: pendingCategories } = useAsyncData(
+    "all-distinct-categories",
+    async () => {
       const { data, error } = await supabase.rpc("get_distinct_categories");
       if (error) return [];
       return data.map((c) => c.category_name);
-    });
+    }
+  );
 
-  const { data: selectableNewspapers, pending: pendingNewspapers } =
-    useAsyncData("all-newspapers-for-select", async () => {
+  const { data: selectableNewspapers, pending: pendingNewspapers } = useAsyncData(
+    "all-newspapers-for-select",
+    async () => {
       const newspapers = await getNewspapers();
       return newspapers.map((n) => ({
         label: n.name,
         value: n.id,
       }));
-    });
-
-  // --- CUD Operations (Corrected) ---
+    }
+  );
 
   const createNewsList = async (
-    listData: NewsListCreateInput,
+    listData: NewsListCreateInput
   ): Promise<{ success: boolean; listId?: string }> => {
     try {
       const { data, error } = await supabase
@@ -139,7 +119,7 @@ export const useNewsList = () => {
       toast.add({
         title: "Fehler",
         description: error.message,
-        color: "error", // FIX: 'red' is not a valid color
+        color: "error",
       });
       return { success: false };
     }
@@ -147,7 +127,7 @@ export const useNewsList = () => {
 
   const updateNewsList = async (
     id: string,
-    listData: NewsListEditInput,
+    listData: NewsListEditInput
   ): Promise<boolean> => {
     try {
       const { error } = await supabase
@@ -164,21 +144,43 @@ export const useNewsList = () => {
       toast.add({
         title: "Fehler",
         description: error.message,
-        color: "error", // FIX: 'red' is not a valid color
+        color: "error",
       });
       return false;
     }
   };
 
-  // This function updates ONLY the author filter for a specific list.
+  const deleteNewsList = async (id: string): Promise<boolean> => {
+    try {
+      const { error } = await supabase
+        .from("newspaper_list")
+        .delete()
+        .eq("id", id);
+      if (error) throw error;
+      toast.add({
+        title: "Liste gelöscht!",
+        icon: "i-heroicons-check-circle",
+      });
+      return true;
+    } catch (error: any) {
+      toast.add({
+        title: "Fehler",
+        description: `Liste konnte nicht gelöscht werden: ${error.message}`,
+        color: "error",
+        icon: "i-heroicons-x-circle",
+      });
+      return false;
+    }
+  };
+
   const editAuthorFilter = async (
     listId: string,
-    authors: string[],
+    authors: string[]
   ): Promise<boolean> => {
     try {
       const { error } = await supabase
         .from("newspaper_list")
-        .update({ filter_authors: authors }) // Update only the authors column
+        .update({ filter_authors: authors })
         .eq("id", listId);
 
       if (error) throw error;
@@ -193,21 +195,20 @@ export const useNewsList = () => {
         title: "Fehler",
         description: `Autorenfilter konnte nicht gespeichert werden: ${error.message}`,
         icon: "i-heroicons-x-circle",
-        color: "error", // FIX: 'red' is not a valid color
+        color: "error",
       });
       return false;
     }
   };
 
-  // This function updates ONLY the category filter for a specific list.
   const editCategoryFilter = async (
     listId: string,
-    categories: string[],
+    categories: string[]
   ): Promise<boolean> => {
     try {
       const { error } = await supabase
         .from("newspaper_list")
-        .update({ filter_categories: categories }) // Update only the categories column
+        .update({ filter_categories: categories })
         .eq("id", listId);
 
       if (error) throw error;
@@ -222,13 +223,11 @@ export const useNewsList = () => {
         title: "Fehler",
         description: `Kategorienfilter konnte nicht gespeichert werden: ${error.message}`,
         icon: "i-heroicons-x-circle",
-        color: "error", // FIX: 'red' is not a valid color
+        color: "error",
       });
       return false;
     }
   };
-
-  // --- Form & Route Helpers (Corrected) ---
 
   const validateNewsListId = (routeId: string | string[]): string => {
     const id = Array.isArray(routeId) ? routeId[0] : routeId;
@@ -241,7 +240,6 @@ export const useNewsList = () => {
     return id;
   };
 
-  // FIX: This function now creates the state object with all required properties.
   const createFormState = () =>
     reactive({
       name: undefined as string | undefined,
@@ -250,10 +248,9 @@ export const useNewsList = () => {
       filter_categories: [] as string[],
     });
 
-  // FIX: This function now populates all properties of the state object.
   const populateFormState = (
     state: ReturnType<typeof createFormState>,
-    list: NewsListEdit,
+    list: NewsListEdit
   ) => {
     state.name = list.name ?? undefined;
     state.newspapers = list.newspapers ?? [];
@@ -261,7 +258,6 @@ export const useNewsList = () => {
     state.filter_categories = list.filter_categories ?? [];
   };
 
-  // Navigation helpers
   const navigateToNewsListEdit = (listId: string) => {
     router.push(`/rss-feeds/${listId}`);
   };
@@ -271,25 +267,22 @@ export const useNewsList = () => {
   };
 
   return {
-    // Schemas
     newsListCreateSchema,
     newsListEditSchema,
-    // CRUD
     getNewsList,
     getMyNewsLists,
     getNewsLists,
     createNewsList,
     updateNewsList,
-    editAuthorFilter, // <-- EXPORTED
-    editCategoryFilter, // <-- EXPORTED
-    // Data for UI
+    deleteNewsList,
+    editAuthorFilter,
+    editCategoryFilter,
     selectableNewspapers,
     pendingNewspapers,
     selectableAuthors,
     pendingAuthors,
     selectableCategories,
     pendingCategories,
-    // Helpers
     validateNewsListId,
     createFormState,
     populateFormState,
