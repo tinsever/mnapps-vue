@@ -5,7 +5,7 @@ const route = useRoute();
 const navigation = [
     { name: "Startseite", href: "/", icon: "i-lucide-home" },
     { name: "Länder", href: "/countries", icon: "i-lucide-globe" },
-    { name: "Währungen", href: "/currencies", icon: "i-lucide-coins" },
+    /*{ name: "Währungen", href: "/currencies", icon: "i-lucide-coins" },*/
     { name: "Zeitungen", href: "/newspapers", icon: "i-lucide-newspaper" },
     { name: "RSS-Listen", href: "/rss-feeds", icon: "i-lucide-rss" },
 ];
