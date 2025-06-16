@@ -48,6 +48,23 @@ const isActive = (href: string) => {
           <UIcon :name="item.icon" />
           <p>{{ item.name }}</p>
         </NuxtLink>
+        <div class="lg:hidden">
+      <UButton
+        v-if="user?.id"
+        variant="outline"
+        to="/auth/logout"
+        trailing-icon="i-lucide-arrow-right"
+        class="w-full justify-center"
+        >Abmelden</UButton
+      >
+      <UButton
+        v-else
+        to="/auth/login"
+        trailing-icon="i-lucide-arrow-right"
+        class="w-full justify-center"
+        >Anmelden
+      </UButton>
+        </div>
       </div>
     </div>
     <div class="m-4">
