@@ -4,12 +4,10 @@ import type { FormSubmitEvent } from "#ui/types";
 
 const supabase = useSupabaseClient();
 const router = useRouter();
-const route = useRoute(); // Access route information
+const route = useRoute();
 
-// Show a confirmation message if the URL has a '?r' query parameter
 const showConfirmationMessage = computed(() => route.query.r !== undefined);
 
-// Schema for form validation with German error messages
 const schema = z.object({
   email: z.string().email("Ungültige E-Mail-Adresse"),
   password: z
@@ -24,7 +22,6 @@ const state = reactive({
   password: undefined,
 });
 
-// Sign-in function triggered on form submission
 const signIn = async (event: FormSubmitEvent<Schema>) => {
   const { error } = await supabase.auth.signInWithPassword({
     email: event.data.email,
@@ -33,9 +30,8 @@ const signIn = async (event: FormSubmitEvent<Schema>) => {
 
   if (error) {
     console.error("Anmeldefehler:", error.message);
-    // Here you could add a toast notification for the user
   } else {
-    router.push("/"); // Redirect to homepage on success
+    router.push("/");
   }
 };
 </script>
@@ -47,7 +43,6 @@ const signIn = async (event: FormSubmitEvent<Schema>) => {
         <h1 class="text-2xl font-bold">Anmeldung</h1>
       </template>
 
-      <!-- This alert will only show if the URL is /auth/login?r -->
       <UAlert
         v-if="showConfirmationMessage"
         icon="i-heroicons-check-circle"

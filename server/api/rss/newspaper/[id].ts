@@ -2,7 +2,6 @@ import { createClient } from "@supabase/supabase-js";
 import RSS from "rss";
 
 export default defineEventHandler(async (event) => {
-  // 1. Get the newspaper ID from the URL
   const newspaperIdParam = getRouterParam(event, "id");
   const newspaperId = parseInt(newspaperIdParam!, 10);
 
@@ -10,16 +9,14 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, statusMessage: "Invalid ID" });
   }
 
-  // 2. Create the Supabase admin client
   const config = useRuntimeConfig(event);
   const supabaseAdmin = createClient(
     config.supabaseUrl!,
     config.supabaseServiceKey!,
   );
 
-  // 3. Fetch the newspaper details, including filter columns
   const { data: newspaperData, error: newspaperError } = await supabaseAdmin
-    .from("newspaper") // Assuming your table is named 'newspapers'
+    .from("newspaper")
     .select("name")
     .eq("id", newspaperId)
     .single();
@@ -32,7 +29,6 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  // 4. Build the query for articles step-by-step
   let query = supabaseAdmin
     .from("parsed_news")
     .select(
@@ -40,7 +36,6 @@ export default defineEventHandler(async (event) => {
     )
     .eq("newspaper_id", newspaperId);
 
-  // Finally, add ordering and limit, then execute the query
   const { data: articles, error: articlesError } = await query
     .order("published_at", { ascending: false })
     .limit(50);
@@ -53,16 +48,14 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  // 5. Create the RSS feed
   const feed = new RSS({
     title: `RSS Feed: ${newspaperData.name}`,
     description: `Die neuesten Nachrichten von "${newspaperData.name}".`,
-    feed_url: `https://your-website.com/api/rss/newspaper/${newspaperId}`,
-    site_url: "https://your-website.com",
+    feed_url: `https://mnapps-vue.vercel.app//api/rss/newspaper/${newspaperId}`,
+    site_url: "https://mnapps-vue.vercel.app/",
     language: "de",
   });
 
-  // 6. Add the fetched articles to the feed
   for (const article of articles || []) {
     const feedItem: any = {
       title: article.title || "Ohne Titel",
@@ -80,7 +73,6 @@ export default defineEventHandler(async (event) => {
     feed.item(feedItem);
   }
 
-  // 7. Send the XML response
   const xml = feed.xml({ indent: true });
   setResponseHeader(event, "Content-Type", "application/rss+xml; charset=utf-8");
   return xml;

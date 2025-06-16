@@ -1,8 +1,7 @@
 import { z } from "zod";
 import type { Database } from "~/types/supabase";
-import { useCountry } from "~/composables/useCountry"; // Wichtig
+import { useCountry } from "~/composables/useCountry";
 
-// Types
 export type Newspaper = Database["public"]["Tables"]["newspaper"]["Row"];
 export type NewspaperInsert =
   Database["public"]["Tables"]["newspaper"]["Insert"];
@@ -17,7 +16,6 @@ export type NewspaperPlus = Pick<
   "id" | "name" | "url" | "rss" | "country" | "description" | "author"
 >;
 
-// Zod Schemas
 export const newspaperBaseSchema = z.object({
   name: z.string().min(3, "Name muss mindestens 3 Zeichen lang sein."),
   url: z.string().url("Muss eine gültige URL sein.").optional().or(z.literal("")),
@@ -36,21 +34,16 @@ export type NewspaperCreateInput = z.output<typeof newspaperCreateSchema>;
 export type NewspaperEditInput = z.output<typeof newspaperEditSchema>;
 
 export const useNewspaper = () => {
-  // Standard-Composables
   const supabase = useSupabaseClient<Database>();
   const user = useSupabaseUser();
   const toast = useToast();
   const router = useRouter();
 
-  // --- KERNÄNDERUNG: useCountry konsumieren ---
-  // Wir holen uns die reaktiven Daten direkt aus dem Country-Composable.
-  // Das ist effizient, da die Daten dank useAsyncData nur einmal geladen werden.
   const {
     countriesForSelect,
-    pendingSelect: pendingCountries, // Umbenannt für Klarheit
+    pendingSelect: pendingCountries,
   } = useCountry();
 
-  // Get single newspaper by ID
   const getNewspaper = async (id: number): Promise<NewspaperPlus> => {
     const { data, error } = await supabase
       .from("newspaper")
@@ -67,7 +60,6 @@ export const useNewspaper = () => {
     return data;
   };
 
-  // Get all newspapers
   const getNewspapers = async (): Promise<NewspaperPlus[]> => {
     const { data, error } = await supabase
       .from("newspaper")
@@ -83,7 +75,6 @@ export const useNewspaper = () => {
     return data || [];
   };
 
-  // Get user's newspapers
   const getMyNewspapers = async (): Promise<NewspaperEdit[]> => {
     if (!user.value?.id) return [];
 
@@ -119,7 +110,6 @@ export const useNewspaper = () => {
     return data || [];
   }
 
-  // Create newspaper
   const createNewspaper = async (
     newspaperData: NewspaperCreateInput,
   ): Promise<{ success: boolean; newspaperId?: number }> => {
@@ -150,7 +140,6 @@ export const useNewspaper = () => {
     }
   };
 
-  // Update newspaper
   const updateNewspaper = async (
     id: number,
     newspaperData: NewspaperEditInput,
@@ -181,7 +170,6 @@ export const useNewspaper = () => {
     }
   };
 
-  // Delete newspaper
   const deleteNewspaper = async (id: number): Promise<boolean> => {
     try {
       const { error } = await supabase.from("newspaper").delete().eq("id", id);
@@ -204,7 +192,6 @@ export const useNewspaper = () => {
     }
   };
 
-  // Validate newspaper ID from route
   const validateNewspaperId = (routeId: string | string[]): number => {
     const id = Number(routeId);
     if (isNaN(id)) {
@@ -216,7 +203,6 @@ export const useNewspaper = () => {
     return id;
   };
 
-  // Create form state
   const createFormState = () =>
     reactive({
       name: undefined as string | undefined,
@@ -226,7 +212,6 @@ export const useNewspaper = () => {
       description: undefined as string | undefined,
     });
 
-  // Populate form state from newspaper data
   const populateFormState = (
     state: ReturnType<typeof createFormState>,
     newspaper: NewspaperEdit,
@@ -238,7 +223,6 @@ export const useNewspaper = () => {
     state.description = newspaper.description ?? undefined;
   };
 
-  // Navigation helpers
   const navigateToNewspaperEdit = (newspaperId: number) => {
     router.push(`/newspapers/${newspaperId}`);
   };
@@ -248,10 +232,8 @@ export const useNewspaper = () => {
   };
 
   return {
-    // Schemas
     newspaperCreateSchema,
     newspaperEditSchema,
-    // CRUD
     getNewspaper,
     getNewspapers,
     getNewspaperOfCountry,
@@ -259,14 +241,11 @@ export const useNewspaper = () => {
     createNewspaper,
     updateNewspaper,
     deleteNewspaper,
-    // Form & Validation
     validateNewspaperId,
     createFormState,
     populateFormState,
-    // Navigation
     navigateToNewspaperEdit,
     navigateToNewspaperList,
-    // --- BEREITGESTELLT VON useCountry ---
     countriesForSelect,
     pendingCountries,
   };

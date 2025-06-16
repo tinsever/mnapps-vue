@@ -139,7 +139,6 @@ const formatDate = (dateString: string) => {
             />
           </div>
 
-          <!-- Content Section -->
           <div class="flex flex-col flex-1 p-4 sm:p-6">
             <NuxtLink
               :to="article.link"
@@ -187,7 +186,6 @@ const formatDate = (dateString: string) => {
       </UCard>
     </div>
 
-    <!-- --- "LOAD MORE" BUTTON --- -->
     <div v-if="showLoadMoreButton" class="text-center">
       <UButton
         label="Weitere Artikel laden"

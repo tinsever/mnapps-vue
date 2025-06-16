@@ -1,7 +1,6 @@
 import { z } from "zod";
 import type { Database } from "~/types/supabase";
 
-// Types
 export type Country = Database["public"]["Tables"]["country"]["Row"];
 export type CountryInsert = Database["public"]["Tables"]["country"]["Insert"];
 export type CountryUpdate = Database["public"]["Tables"]["country"]["Update"];
@@ -13,7 +12,6 @@ interface CountrySelect {
   name: string;
 }
 
-// Schemas
 export const countryCreateSchema = z.object({
   name: z.string().min(3, "Name muss mindestens 3 Zeichen lang sein."),
   full_name: z
@@ -45,7 +43,6 @@ export const useCountry = () => {
   const toast = useToast();
   const router = useRouter();
 
-  // --- START: Added for reactive select menu data ---
   const getCountriesForSelect = async (): Promise<CountrySelect[]> => {
     const { data, error } = await supabase
       .from("country")
@@ -53,7 +50,6 @@ export const useCountry = () => {
       .order("name");
 
     if (error) {
-      // Log error instead of throwing, as useAsyncData will handle it
       console.error("Fehler beim Laden der Länder für Select:", error);
       return [];
     }
@@ -72,11 +68,8 @@ export const useCountry = () => {
       default: () => [],
     }
   );
-  // --- END: Added for reactive select menu data ---
 
-  // Get single country by ID
   const getCountry = async (id: number): Promise<CountryPlus> => {
-    // ... (rest of the function is unchanged)
     const { data, error } = await supabase
       .from("country")
       .select("id, name, full_name, short, author")
@@ -93,9 +86,7 @@ export const useCountry = () => {
     return data;
   };
 
-  // Get all countries
   const getCountries = async (): Promise<CountryPlus[]> => {
-    // ... (rest of the function is unchanged)
     const { data, error } = await supabase
       .from("country")
       .select("id, name, full_name, short, author")
@@ -111,9 +102,7 @@ export const useCountry = () => {
     return data || [];
   };
 
-  // Get user's countries
   const getMyCountries = async (): Promise<CountryEdit[]> => {
-    // ... (rest of the function is unchanged)
     const user = useSupabaseUser();
 
     if (!user.value?.id) return [];
@@ -134,11 +123,9 @@ export const useCountry = () => {
     return data || [];
   };
 
-  // Create country
   const createCountry = async (
     countryData: CountryCreateInput
   ): Promise<{ success: boolean; countryId?: number }> => {
-    // ... (rest of the function is unchanged)
     try {
       const insertData: CountryInsert = countryData;
       const { error: insertError } = await supabase
@@ -147,7 +134,6 @@ export const useCountry = () => {
 
       if (insertError) throw insertError;
 
-      // Get the created country's ID
       const { data: country, error: queryError } = await supabase
         .from("country")
         .select("id")
@@ -175,12 +161,10 @@ export const useCountry = () => {
     }
   };
 
-  // Update country
   const updateCountry = async (
     id: number,
     countryData: CountryEditInput
   ): Promise<boolean> => {
-    // ... (rest of the function is unchanged)
     try {
       const updateData: CountryUpdate = countryData;
       const { error } = await supabase
@@ -209,9 +193,7 @@ export const useCountry = () => {
     }
   };
 
-  // Delete country
   const deleteCountry = async (id: number): Promise<boolean> => {
-    // ... (rest of the function is unchanged)
     try {
       const { error } = await supabase.from("country").delete().eq("id", id);
 
@@ -236,9 +218,7 @@ export const useCountry = () => {
     }
   };
 
-  // Validate country ID from route
   const validateCountryId = (routeId: string | string[]): number => {
-    // ... (rest of the function is unchanged)
     const id = Number(routeId);
     if (isNaN(id)) {
       throw createError({
@@ -249,7 +229,6 @@ export const useCountry = () => {
     return id;
   };
 
-  // Create reactive state for forms
   const createCountryFormState = () =>
     reactive<{
       name: string | undefined;
@@ -270,13 +249,11 @@ export const useCountry = () => {
       short: undefined,
     });
 
-  // Populate form state from country data
   const populateFormState = (
     state: any,
     country: CountryEdit,
     includeNames = true
   ) => {
-    // ... (rest of the function is unchanged)
     if (includeNames && "name" in state) {
       state.name = country.name || undefined;
     }
@@ -284,7 +261,6 @@ export const useCountry = () => {
     state.short = country.short || undefined;
   };
 
-  // Navigation helpers
   const navigateToCountryEdit = (countryId: number) => {
     router.push(`/countries/${countryId}`);
   };
@@ -294,26 +270,21 @@ export const useCountry = () => {
   };
 
   return {
-    // Types
     countryCreateSchema,
     countryEditSchema,
-    // CRUD operations
     getCountry,
     getCountries,
     getMyCountries,
     createCountry,
     updateCountry,
     deleteCountry,
-    // Utilities
     validateCountryId,
     createCountryFormState,
     createEditFormState,
     populateFormState,
-    // Navigation
     navigateToCountryEdit,
     navigateToCountryList,
 
-    // --- MODIFIED: Export reactive data instead of the fetch function ---
     countriesForSelect,
     pendingSelect,
     errorSelect,

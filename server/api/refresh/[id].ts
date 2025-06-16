@@ -20,21 +20,15 @@ export default defineEventHandler(async (event) => {
 
   const functionName = `process_one_newspaper/${newspaperId}`;
 
-  // --- MODIFICATION HERE ---
-  // We will now explicitly set the Authorization and API Key headers.
   const { data, error } = await supabaseAdmin.functions.invoke(functionName, {
     headers: {
-      // The client library uses the 'apikey' for the anon key.
-      // We are providing the service key as the Bearer token for authorization.
       Authorization: `Bearer ${config.supabaseServiceKey}`,
     },
   });
-  // --- END MODIFICATION ---
 
   if (error) {
     console.error(
       `Error invoking Supabase function '${functionName}':`,
-      // The error object might have more context now
       error.context || error,
     );
     throw createError({

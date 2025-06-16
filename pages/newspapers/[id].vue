@@ -1,5 +1,4 @@
 <script setup lang="ts">
-// 1. Import `ref` and `useToast`
 import { computed, ref } from "vue";
 import { useToast } from "#imports";
 
@@ -8,7 +7,7 @@ const user = useSupabaseUser();
 const userId = computed(() => user.value?.id || null);
 
 const route = useRoute();
-const toast = useToast(); // Initialize toast for notifications
+const toast = useToast();
 const routeId = computed(() => validateNewspaperId(route.params.id));
 
 const { data: newspaper, pending } = useAsyncData(
@@ -19,12 +18,9 @@ const { data: newspaper, pending } = useAsyncData(
   },
 );
 
-// This ref is for the delete button
 const loading = ref(false);
-// 2. Create a separate loading state for the reload button
 const isReloading = ref(false);
 
-// 3. Add the function to handle the API call
 async function handleReload() {
   if (!routeId.value) {
     toast.add({
@@ -68,7 +64,6 @@ async function handleReload() {
     </div>
   </div>
 
-  <!-- Main content -->
   <div v-else-if="newspaper">
     <NuxtLink to="/newspapers" class="">
       <p class="flex gap-2 items-center text-white/40 hover:text-white">
@@ -87,7 +82,6 @@ async function handleReload() {
           </UButton>
         </NewspaperEditModal>
 
-        <!-- 4. ADDED THE RELOAD BUTTON HERE -->
         <UButton
           variant="soft"
           :leading-icon="isReloading ? 'i-lucide-loader' : 'i-lucide-rss'"

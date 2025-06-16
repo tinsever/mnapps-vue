@@ -5,7 +5,6 @@ import type { FormSubmitEvent } from "#ui/types";
 const supabase = useSupabaseClient();
 const router = useRouter();
 
-// Schema for form validation with German error messages
 const schema = z
   .object({
     email: z.string().email("Ungültige E-Mail-Adresse"),
@@ -18,7 +17,7 @@ const schema = z
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Die Passwörter stimmen nicht überein",
-    path: ["confirmPassword"], // Set error on the confirmation field
+    path: ["confirmPassword"],
   });
 
 type Schema = z.output<typeof schema>;
@@ -29,7 +28,6 @@ const state = reactive({
   confirmPassword: undefined,
 });
 
-// Sign-up function triggered on form submission
 const signUp = async (event: FormSubmitEvent<Schema>) => {
   const { error } = await supabase.auth.signUp({
     email: event.data.email,
@@ -38,10 +36,9 @@ const signUp = async (event: FormSubmitEvent<Schema>) => {
 
   if (error) {
     console.error("Registrierungsfehler:", error.message);
-    // Add a toast notification for the user here
   } else {
     console.log("Überprüfen Sie Ihre E-Mails für den Bestätigungslink");
-    router.push("/auth/login?r=1"); // Redirect to login after successful sign-up
+    router.push("/auth/login?r=1");
   }
 };
 </script>

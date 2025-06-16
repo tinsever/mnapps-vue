@@ -1,4 +1,3 @@
-<!-- pages/newsLists/[id].vue -->
 <script setup lang="ts">
 import { computed } from "vue";
 import { useRequestURL } from "#app";
@@ -13,7 +12,6 @@ const userId = computed(() => user.value?.id || null);
 const route = useRoute();
 const routeId = computed(() => validateNewsListId(route.params.id));
 
-// Fetch the specific news list
 const { data: newsList, pending } = useAsyncData(
     "newslist-details",
     () => getNewsList(routeId.value),
@@ -24,18 +22,16 @@ const { data: newsList, pending } = useAsyncData(
 
 const loading = ref(false);
 
-// Use a computed property to ensure the URL is created after newsList is loaded
 const value = computed(() => {
     if (newsList.value?.id) {
         return `${baseUrl}api/rss/list/${newsList.value.id}`;
     }
-    return ""; // Return an empty string while loading
+    return "";
 });
 
 const copied = ref(false);
 
 function copy() {
-    // Prevent copying an empty string
     if (!value.value) return;
 
     navigator.clipboard.writeText(value.value);
@@ -48,7 +44,6 @@ function copy() {
 </script>
 
 <template>
-    <!-- Loading State -->
     <div v-if="pending" class="flex justify-center items-center min-h-64">
         <div class="flex flex-col items-center gap-4">
             <UIcon name="i-heroicons-arrow-path" class="w-8 h-8 animate-spin" />
@@ -56,7 +51,6 @@ function copy() {
         </div>
     </div>
 
-    <!-- Main Content -->
     <div v-else-if="newsList">
         <NuxtLink to="/rss-feeds" class="">
             <p class="flex gap-2 items-center text-white/40 hover:text-white">
@@ -65,7 +59,6 @@ function copy() {
         </NuxtLink>
         <div class="flex justify-between items-center">
             <h2 class="text-3xl font-bold">{{ newsList.name }}</h2>
-            <!-- Actions are only available to the author of the list -->
             <div class="flex gap-2">
                 <UButton leading-icon="i-lucide-rss" :to="'/api/rss/list/' + newsList.id" external>RSS-Feed</UButton>
                 <div v-if="userId == newsList.author" class="flex gap-2">
@@ -98,13 +91,11 @@ function copy() {
         </UInput>
         <USeparator class="my-2"></USeparator>
 
-        <!-- Component to display the newspapers contained in this list -->
         <div>
             <LazyNewsListShowNewspapers :list-id="newsList.id.toString()"></LazyNewsListShowNewspapers>
         </div>
     </div>
 
-    <!-- Not Found State -->
     <div v-else class="flex justify-center items-center min-h-64">
         <UCard>
             <div class="flex flex-col items-center gap-4 p-8">
