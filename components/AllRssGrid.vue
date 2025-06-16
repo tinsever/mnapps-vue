@@ -4,7 +4,7 @@ const user = useSupabaseUser();
 const userId = user.value?.id || null;
 
 const { data: newsLists, pending } = await useAsyncData(
-  "all-newspapers",
+  "all-newslists",
   getNewsLists
 );
 </script>
