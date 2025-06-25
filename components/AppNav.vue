@@ -24,7 +24,7 @@ const isActive = (href: string) => {
 </script>
 
 <template>
-  <div class="flex h-screen flex-col justify-between">
+  <div class="flex h-full flex-col justify-between">
     <div class="m-4">
       <div class="hidden lg:block">
         <p class="font-bold text-2xl">

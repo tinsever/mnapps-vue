@@ -1,9 +1,17 @@
+import Aura from '@primeuix/themes/aura';
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   compatibilityDate: '2025-05-15',
   devtools: { enabled: true },
-  modules: ['@nuxtjs/supabase', '@nuxt/ui', '@nuxtjs/tailwindcss'],
-  css: ['~/assets/css/main.css'],
+  modules: ['@nuxtjs/supabase', '@nuxt/ui', '@nuxtjs/tailwindcss', '@primevue/nuxt-module'],
+  css: ['~/assets/css/main.css'], 
+  primevue: {
+    options: {
+      theme: {
+        preset: Aura
+      }
+    }
+  },
   supabase: {
     redirect: false,
   },
